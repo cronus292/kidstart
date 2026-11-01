@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f4f7fc">
+<title>Spel · Kinderstart</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#f4f7fc;color:#18283e}
+body{display:flex;flex-direction:column}.bar{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:6px max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left));background:#fff;border-bottom:1px solid #d9e0ea}.bar a,.bar button{border:1px solid #c8d3e5;border-radius:9px;background:white;color:#184eae;font-size:15px;text-decoration:none;padding:8px 11px;white-space:nowrap}.bar strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;flex:1}.viewer{position:relative;flex:1;min-height:0}iframe{border:0;width:100%;height:100%;display:block}#warning{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#f4f7fc;padding:24px;text-align:center}.msg{max-width:450px}.msg a{color:#184eae}#warning.visible{display:flex}
+</style>
+</head>
+<body>
+<div class="bar"><a id="back" href="kind1.html">← Terug</a><strong>Digipuzzle – bouwen</strong><button id="direct" type="button">Open rechtstreeks ↗</button></div>
+<div class="viewer"><iframe id="game" title="Digipuzzle" allow="fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><div id="warning"><div class="msg"><h2>Kan het spel niet weergeven</h2><p>Controleer de link of open het spel rechtstreeks. Als Digipuzzle insluiten blokkeert, blijft bij rechtstreeks openen de browserbalk mogelijk zichtbaar.</p><a id="fallback" href="#">Open Digipuzzle ↗</a></div></div></div>
+<script>
+(()=>{'use strict';const p=new URLSearchParams(location.search),child=/^[1-4]$/.test(p.get('kind')||'')?p.get('kind'):'1';document.getElementById('back').href='kind'+child+'.html';const candidate=p.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true';let u;try{u=new URL(candidate);if(u.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net'].includes(u.hostname))throw Error('invalid URL');}catch(_){document.getElementById('warning').classList.add('visible');return;}const direct=()=>{window.location.href=u.href};document.getElementById('direct').addEventListener('click',direct);const fallback=document.getElementById('fallback');fallback.href=u.href;document.getElementById('game').src=u.href;})();
+</script>
+</body>
+</html>

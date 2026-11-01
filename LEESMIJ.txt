@@ -1,0 +1,19 @@
+KINDERSTART – FULLSCREEN DIGIPUZZLE TEST
+Repository: https://github.com/cronus292/kidstart
+
+Upload naar de HOOFDMAP (root):
+  app.js     (bestaand bestand vervangen)
+  spel.html  (nieuw bestand)
+
+Upload LEESMIJ.txt niet (mag wel, niet nodig).
+GitHub: Code > Add file > Upload files > selecteer app.js en spel.html > Commit changes.
+Bij een bestaand app.js zal GitHub op de uploadpagina aangeven dat het bestand wordt vervangen.
+
+Test: open het reeds aanwezige Kinderstart-pictogram op de iPad, ga naar een kinderpagina en tik op Digipuzzle.
+De URL in de linkinstellingen blijft onveranderd. De nieuwe app.js stuurt uitsluitend Digipuzzle-links via spel.html.
+
+Als het spel leeg blijft of een fout toont, kan Digipuzzle iframe-insluiting blokkeren.
+Klik dan op 'Open rechtstreeks'. Dit geeft waarschijnlijk weer een browserbalk.
+
+Let op: dit is een experiment, geen garantie op fullscreen bij externe sites.
+De kinderpagina's en hun lokaal opgeslagen instellingen veranderen niet.
