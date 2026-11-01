@@ -24,13 +24,13 @@ body{height:100vh;height:100dvh}
 <div class="viewer" id="viewer"><iframe id="game" title="Digipuzzle" allow="fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
 <section class="panel" id="panel" hidden aria-label="Weergave-instellingen">
-<h2>Spel vergroten en bijsnijden</h2>
-<p>Verberg de lege strook onderaan en vergroot zo nodig het spel. De instellingen worden op deze iPad onthouden.</p>
-<div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><input id="crop" type="range" min="0" max="240" step="5" value="0"></div>
-<div class="row"><label for="zoom">Zoom</label><output id="zoomValue">100%</output><input id="zoom" type="range" min="100" max="160" step="5" value="100"></div>
-<div class="row"><label for="shift">Omhoog schuiven</label><output id="shiftValue">0 px</output><input id="shift" type="range" min="0" max="120" step="5" value="0"></div>
+<h2>Spelweergave aanpassen</h2>
+<p>Zoom het iframe in of uit en verschuif het omhoog of omlaag. Daarmee verandert ook de beschikbare ruimte waarin Digipuzzle zijn spel tekent. De instellingen worden op deze iPad onthouden.</p>
+<div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><input id="crop" type="range" min="0" max="450" step="5" value="0"></div>
+<div class="row"><label for="zoom">Iframe-zoom (uit- en inzoomen)</label><output id="zoomValue">100%</output><input id="zoom" type="range" min="40" max="160" step="5" value="100"></div>
+<div class="row"><label for="shift">Verticaal verschuiven (− omhoog, + omlaag)</label><output id="shiftValue">0 px</output><input id="shift" type="range" min="-120" max="200" step="5" value="0"></div>
 <div class="actions"><button id="reset" type="button">Herstellen</button><button id="close" type="button">Gereed</button><a id="direct" href="#">Rechtstreeks ↗</a></div>
-<p class="tip">Let op: dit snijdt de weergave bij; het verwijdert geen advertentie-element uit de Digipuzzle-code. Controleer dat spelknoppen zichtbaar blijven.</p>
+<p class="tip">Let op: het iframe wordt visueel geschaald en afgesneden. Of het spel zelf groter wordt, hangt af van de Digipuzzle-layout. De advertentiecontainer wordt niet uit de website verwijderd.</p>
 </section>
 <div id="warning"><div><h2>Ongeldige spellink</h2><p>Open het spel via de Kinderstart-pagina.</p><a href="kind1.html" id="fallback">Terug</a></div></div>
 <script>
@@ -49,12 +49,19 @@ const crop=document.getElementById('crop'),zoom=document.getElementById('zoom'),
 const key='kinderstart_view_'+url.pathname;
 let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{}}catch(_){}
 const clamp=(x,min,max,def)=>Number.isFinite(Number(x))?Math.min(max,Math.max(min,Number(x))):def;
-crop.value=clamp(saved.crop,0,240,0);zoom.value=clamp(saved.zoom,100,160,100);shift.value=clamp(saved.shift,0,120,0);
-function apply(){const c=Number(crop.value),z=Number(zoom.value)/100,s=Number(shift.value);const w=viewer.clientWidth,h=viewer.clientHeight;
-// Vergroot eerst de virtuele iframe-hoogte zodat een advertentiestrook onder de onderrand valt.
-// Zoom daarna het gehele iframe, eventueel met een kleine verschuiving omhoog.
-game.style.width=(w/z)+'px';game.style.height=((h+c+s)/z)+'px';game.style.transform=`translateY(${-s}px) scale(${z})`;
-document.getElementById('cropValue').textContent=c+' px';document.getElementById('zoomValue').textContent=Math.round(z*100)+'%';document.getElementById('shiftValue').textContent=s+' px';
+crop.value=clamp(saved.crop,0,450,0);zoom.value=clamp(saved.zoom,40,160,100);shift.value=clamp(saved.shift,-120,200,0);
+function apply(){
+const c=Number(crop.value),z=Number(zoom.value)/100,s=Number(shift.value);
+const w=viewer.clientWidth,h=viewer.clientHeight;
+// Een kleinere schaal geeft Digipuzzle een bredere/ hogere virtuele viewport.
+// Positieve verschuiving beweegt omlaag; negatieve verschuiving omhoog.
+// Extra hoogte (crop) houdt de iframe-inhoud ook bij bijsnijden bereikbaar.
+game.style.width=(w/z)+'px';
+game.style.height=((h-s+c)/z)+'px';
+game.style.transform=`translateY(${s}px) scale(${z})`;
+document.getElementById('cropValue').textContent=c+' px';
+document.getElementById('zoomValue').textContent=Math.round(z*100)+'%';
+document.getElementById('shiftValue').textContent=(s>0?'+':'')+s+' px';
 try{localStorage.setItem(key,JSON.stringify({crop:c,zoom:Number(zoom.value),shift:s}))}catch(_){}
 }
 [crop,zoom,shift].forEach(el=>el.addEventListener('input',apply));
