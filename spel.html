@@ -8,15 +8,61 @@
 <meta name="theme-color" content="#f4f7fc">
 <title>Spel · Kinderstart</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#f4f7fc;color:#18283e}
-body{display:flex;flex-direction:column}.bar{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:6px max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left));background:#fff;border-bottom:1px solid #d9e0ea}.bar a,.bar button{border:1px solid #c8d3e5;border-radius:9px;background:white;color:#184eae;font-size:15px;text-decoration:none;padding:8px 11px;white-space:nowrap}.bar strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;flex:1}.viewer{position:relative;flex:1;min-height:0}iframe{border:0;width:100%;height:100%;display:block}#warning{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#f4f7fc;padding:24px;text-align:center}.msg{max-width:450px}.msg a{color:#184eae}#warning.visible{display:flex}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#f4f7fc;color:#18283e}
+body{height:100vh;height:100dvh}
+.viewer{position:absolute;inset:0;overflow:hidden;background:white}
+#game{position:absolute;left:0;top:0;display:block;border:0;transform-origin:top left}
+.toolbar{position:absolute;z-index:3;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;align-items:flex-start;justify-content:space-between;gap:10px;pointer-events:none}
+.toolbar a,.toolbar button{pointer-events:auto;border:1px solid #b6c4d7;border-radius:10px;background:rgba(255,255,255,.94);color:#173a73;text-decoration:none;font-size:15px;font-weight:650;padding:10px 12px;min-height:44px;box-shadow:0 1px 8px #0002}
+.panel{position:absolute;z-index:4;top:calc(max(8px,env(safe-area-inset-top)) + 54px);right:max(8px,env(safe-area-inset-right));width:min(340px,calc(100% - 16px));background:#fffefb;border:1px solid #bcc8d5;border-radius:13px;padding:14px;box-shadow:0 4px 24px #0003;font-size:14px}
+.panel[hidden]{display:none}.panel h2{font-size:16px;margin:0 0 6px}.panel p{margin:4px 0 12px;color:#46556a}.row{display:grid;grid-template-columns:1fr auto;gap:5px 8px;margin:12px 0}.row label{font-weight:600}.row input{grid-column:1/-1;width:100%;accent-color:#1858a7;min-height:30px}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button,.actions a{font:inherit;border:1px solid #bdc8d7;border-radius:8px;background:#f6f9ff;padding:9px 11px;color:#173a73;text-decoration:none}.tip{font-size:12px;color:#566376}
+#warning{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;background:white;padding:24px;text-align:center}#warning.visible{display:flex}
 </style>
 </head>
 <body>
-<div class="bar"><a id="back" href="kind1.html">← Terug</a><strong>Digipuzzle – bouwen</strong><button id="direct" type="button">Open rechtstreeks ↗</button></div>
-<div class="viewer"><iframe id="game" title="Digipuzzle" allow="fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><div id="warning"><div class="msg"><h2>Kan het spel niet weergeven</h2><p>Controleer de link of open het spel rechtstreeks. Als Digipuzzle insluiten blokkeert, blijft bij rechtstreeks openen de browserbalk mogelijk zichtbaar.</p><a id="fallback" href="#">Open Digipuzzle ↗</a></div></div></div>
+<div class="viewer" id="viewer"><iframe id="game" title="Digipuzzle" allow="fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
+<section class="panel" id="panel" hidden aria-label="Weergave-instellingen">
+<h2>Spel vergroten en bijsnijden</h2>
+<p>Verberg de lege strook onderaan en vergroot zo nodig het spel. De instellingen worden op deze iPad onthouden.</p>
+<div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><input id="crop" type="range" min="0" max="240" step="5" value="0"></div>
+<div class="row"><label for="zoom">Zoom</label><output id="zoomValue">100%</output><input id="zoom" type="range" min="100" max="160" step="5" value="100"></div>
+<div class="row"><label for="shift">Omhoog schuiven</label><output id="shiftValue">0 px</output><input id="shift" type="range" min="0" max="120" step="5" value="0"></div>
+<div class="actions"><button id="reset" type="button">Herstellen</button><button id="close" type="button">Gereed</button><a id="direct" href="#">Rechtstreeks ↗</a></div>
+<p class="tip">Let op: dit snijdt de weergave bij; het verwijdert geen advertentie-element uit de Digipuzzle-code. Controleer dat spelknoppen zichtbaar blijven.</p>
+</section>
+<div id="warning"><div><h2>Ongeldige spellink</h2><p>Open het spel via de Kinderstart-pagina.</p><a href="kind1.html" id="fallback">Terug</a></div></div>
 <script>
-(()=>{'use strict';const p=new URLSearchParams(location.search),child=/^[1-4]$/.test(p.get('kind')||'')?p.get('kind'):'1';document.getElementById('back').href='kind'+child+'.html';const candidate=p.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true';let u;try{u=new URL(candidate);if(u.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net'].includes(u.hostname))throw Error('invalid URL');}catch(_){document.getElementById('warning').classList.add('visible');return;}const direct=()=>{window.location.href=u.href};document.getElementById('direct').addEventListener('click',direct);const fallback=document.getElementById('fallback');fallback.href=u.href;document.getElementById('game').src=u.href;})();
+(()=>{'use strict';
+const params=new URLSearchParams(location.search);
+const child=/^[1-4]$/.test(params.get('kind')||'')?params.get('kind'):'1';
+document.getElementById('back').href='kind'+child+'.html';
+document.getElementById('fallback').href='kind'+child+'.html';
+let url;
+try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net'].includes(url.hostname))throw Error('URL niet toegestaan');}
+catch(_){document.getElementById('warning').classList.add('visible');return;}
+document.getElementById('game').src=url.href;
+document.getElementById('direct').href=url.href;
+const game=document.getElementById('game'),viewer=document.getElementById('viewer'),panel=document.getElementById('panel'),settings=document.getElementById('settings');
+const crop=document.getElementById('crop'),zoom=document.getElementById('zoom'),shift=document.getElementById('shift');
+const key='kinderstart_view_'+url.pathname;
+let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{}}catch(_){}
+const clamp=(x,min,max,def)=>Number.isFinite(Number(x))?Math.min(max,Math.max(min,Number(x))):def;
+crop.value=clamp(saved.crop,0,240,0);zoom.value=clamp(saved.zoom,100,160,100);shift.value=clamp(saved.shift,0,120,0);
+function apply(){const c=Number(crop.value),z=Number(zoom.value)/100,s=Number(shift.value);const w=viewer.clientWidth,h=viewer.clientHeight;
+// Vergroot eerst de virtuele iframe-hoogte zodat een advertentiestrook onder de onderrand valt.
+// Zoom daarna het gehele iframe, eventueel met een kleine verschuiving omhoog.
+game.style.width=(w/z)+'px';game.style.height=((h+c+s)/z)+'px';game.style.transform=`translateY(${-s}px) scale(${z})`;
+document.getElementById('cropValue').textContent=c+' px';document.getElementById('zoomValue').textContent=Math.round(z*100)+'%';document.getElementById('shiftValue').textContent=s+' px';
+try{localStorage.setItem(key,JSON.stringify({crop:c,zoom:Number(zoom.value),shift:s}))}catch(_){}
+}
+[crop,zoom,shift].forEach(el=>el.addEventListener('input',apply));
+document.getElementById('reset').addEventListener('click',()=>{crop.value=0;zoom.value=100;shift.value=0;apply()});
+function showPanel(open){panel.hidden=!open;settings.setAttribute('aria-expanded',String(open));}
+settings.addEventListener('click',()=>showPanel(panel.hidden));document.getElementById('close').addEventListener('click',()=>showPanel(false));
+window.addEventListener('resize',apply);apply();
+})();
 </script>
 </body>
 </html>
