@@ -11,6 +11,9 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#f4f7fc;color:#18283e}
 body{height:100vh;height:100dvh}
+#app{position:fixed;inset:0;background:white;overflow:hidden}
+#app:fullscreen{width:100%;height:100%;background:white}
+#fullscreenNote{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#122c48;color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;z-index:6;max-width:90%;text-align:center}#fullscreenNote[hidden]{display:none}
 .viewer{position:absolute;inset:0;overflow:hidden;background:white}
 #game{position:absolute;left:0;top:0;display:block;border:0;transform-origin:top left}
 .toolbar{position:absolute;z-index:3;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;align-items:flex-start;justify-content:space-between;gap:10px;pointer-events:none}
@@ -21,18 +24,23 @@ body{height:100vh;height:100dvh}
 </style>
 </head>
 <body>
-<div class="viewer" id="viewer"><iframe id="game" title="Digipuzzle" allow="fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-<div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
+<div id="app">
+<div class="viewer" id="viewer"><iframe id="game" title="Digipuzzle" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="full" type="button" title="Volledig scherm met Kinderstart-knoppen">⛶ Schermvullend</button><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
 <section class="panel" id="panel" hidden aria-label="Weergave-instellingen">
 <h2>Spelweergave aanpassen</h2>
-<p>Zoom het iframe in of uit en verschuif het omhoog of omlaag. Daarmee verandert ook de beschikbare ruimte waarin Digipuzzle zijn spel tekent. De instellingen worden op deze iPad onthouden.</p>
+<p>Zoom het iframe in of uit, verschuif het horizontaal of verticaal en snijd ongewenste randen af. Daarmee verandert ook de beschikbare ruimte waarin Digipuzzle zijn spel tekent. De instellingen worden op deze iPad onthouden.</p>
 <div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><input id="crop" type="range" min="0" max="450" step="5" value="0"></div>
-<div class="row"><label for="zoom">Iframe-zoom (uit- en inzoomen)</label><output id="zoomValue">100%</output><input id="zoom" type="range" min="40" max="160" step="5" value="100"></div>
+<div class="row"><label for="leftCrop">Linkerkant afsnijden</label><output id="leftCropValue">0 px</output><input id="leftCrop" type="range" min="0" max="450" step="5" value="0"></div>
+<div class="row"><label for="zoom">Iframe-zoom (uit- en inzoomen)</label><output id="zoomValue">100%</output><input id="zoom" type="range" min="10" max="190" step="5" value="100"></div>
 <div class="row"><label for="shift">Verticaal verschuiven (− omhoog, + omlaag)</label><output id="shiftValue">0 px</output><input id="shift" type="range" min="-120" max="200" step="5" value="0"></div>
+<div class="row"><label for="shiftX">Horizontaal verschuiven (− links, + rechts)</label><output id="shiftXValue">0 px</output><input id="shiftX" type="range" min="-300" max="300" step="5" value="0"></div>
 <div class="actions"><button id="reset" type="button">Herstellen</button><button id="close" type="button">Gereed</button><a id="direct" href="#">Rechtstreeks ↗</a></div>
 <p class="tip">Let op: het iframe wordt visueel geschaald en afgesneden. Of het spel zelf groter wordt, hangt af van de Digipuzzle-layout. De advertentiecontainer wordt niet uit de website verwijderd.</p>
 </section>
 <div id="warning"><div><h2>Ongeldige spellink</h2><p>Open het spel via de Kinderstart-pagina.</p><a href="kind1.html" id="fallback">Terug</a></div></div>
+<div id="fullscreenNote" role="status" hidden></div>
+</div>
 <script>
 (()=>{'use strict';
 const params=new URLSearchParams(location.search);
@@ -42,30 +50,48 @@ document.getElementById('fallback').href='kind'+child+'.html';
 let url;
 try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net'].includes(url.hostname))throw Error('URL niet toegestaan');}
 catch(_){document.getElementById('warning').classList.add('visible');return;}
+if(url.hostname.endsWith('digipuzzle.net')&&!url.searchParams.has('nolink'))url.searchParams.set('nolink','true');
 document.getElementById('game').src=url.href;
 document.getElementById('direct').href=url.href;
 const game=document.getElementById('game'),viewer=document.getElementById('viewer'),panel=document.getElementById('panel'),settings=document.getElementById('settings');
-const crop=document.getElementById('crop'),zoom=document.getElementById('zoom'),shift=document.getElementById('shift');
+const full=document.getElementById('full'),app=document.getElementById('app'),note=document.getElementById('fullscreenNote');
+let noteTimer;function message(t){note.textContent=t;note.hidden=false;clearTimeout(noteTimer);noteTimer=setTimeout(()=>{note.hidden=true},3800)}
+function currentFullscreen(){return document.fullscreenElement||document.webkitFullscreenElement}
+full.addEventListener('click',async()=>{
+ try{
+  if(currentFullscreen()){if(document.exitFullscreen)await document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen()}
+  else if(app.requestFullscreen){await app.requestFullscreen()}
+  else if(app.webkitRequestFullscreen){app.webkitRequestFullscreen()}
+  else message('De webapp gebruikt al de volledige schermruimte. Gebruik niet de fullscreenknop van Digipuzzle.');
+ }catch(_){message('Schermvullend starten lukt niet op deze iPad. De Kinderstart-webapp blijft zonder adresbalk werken.')}
+});
+function updateFull(){full.textContent=currentFullscreen()?'⤢ Verkleinen':'⛶ Schermvullend';setTimeout(apply,120)}
+document.addEventListener('fullscreenchange',updateFull);document.addEventListener('webkitfullscreenchange',updateFull);
+const crop=document.getElementById('crop'),leftCrop=document.getElementById('leftCrop'),zoom=document.getElementById('zoom'),shift=document.getElementById('shift'),shiftX=document.getElementById('shiftX');
 const key='kinderstart_view_'+url.pathname;
 let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{}}catch(_){}
 const clamp=(x,min,max,def)=>Number.isFinite(Number(x))?Math.min(max,Math.max(min,Number(x))):def;
-crop.value=clamp(saved.crop,0,450,0);zoom.value=clamp(saved.zoom,40,160,100);shift.value=clamp(saved.shift,-120,200,0);
+crop.value=clamp(saved.crop,0,450,0);leftCrop.value=clamp(saved.leftCrop,0,450,0);zoom.value=clamp(saved.zoom,10,190,100);shift.value=clamp(saved.shift,-120,200,0);shiftX.value=clamp(saved.shiftX,-300,300,0);
 function apply(){
-const c=Number(crop.value),z=Number(zoom.value)/100,s=Number(shift.value);
+const c=Number(crop.value),lc=Number(leftCrop.value),z=Number(zoom.value)/100,s=Number(shift.value),sx=Number(shiftX.value);
 const w=viewer.clientWidth,h=viewer.clientHeight;
 // Een kleinere schaal geeft Digipuzzle een bredere/ hogere virtuele viewport.
 // Positieve verschuiving beweegt omlaag; negatieve verschuiving omhoog.
 // Extra hoogte (crop) houdt de iframe-inhoud ook bij bijsnijden bereikbaar.
-game.style.width=(w/z)+'px';
+// Het iframe begint links buiten beeld met de ingestelde afsnijding.
+// De breedte wordt aangepast zodat de rechterrand desondanks beschikbaar blijft.
+game.style.width=(Math.max(1,w-sx+lc)/z)+'px';
 game.style.height=((h-s+c)/z)+'px';
-game.style.transform=`translateY(${s}px) scale(${z})`;
+game.style.transform=`translate(${sx-lc}px, ${s}px) scale(${z})`;
 document.getElementById('cropValue').textContent=c+' px';
+document.getElementById('leftCropValue').textContent=lc+' px';
+document.getElementById('shiftXValue').textContent=(sx>0?'+':'')+sx+' px';
 document.getElementById('zoomValue').textContent=Math.round(z*100)+'%';
 document.getElementById('shiftValue').textContent=(s>0?'+':'')+s+' px';
-try{localStorage.setItem(key,JSON.stringify({crop:c,zoom:Number(zoom.value),shift:s}))}catch(_){}
+try{localStorage.setItem(key,JSON.stringify({crop:c,leftCrop:lc,zoom:Number(zoom.value),shift:s,shiftX:sx}))}catch(_){}
 }
-[crop,zoom,shift].forEach(el=>el.addEventListener('input',apply));
-document.getElementById('reset').addEventListener('click',()=>{crop.value=0;zoom.value=100;shift.value=0;apply()});
+[crop,leftCrop,zoom,shift,shiftX].forEach(el=>el.addEventListener('input',apply));
+document.getElementById('reset').addEventListener('click',()=>{crop.value=0;leftCrop.value=0;zoom.value=100;shift.value=0;shiftX.value=0;apply()});
 function showPanel(open){panel.hidden=!open;settings.setAttribute('aria-expanded',String(open));}
 settings.addEventListener('click',()=>showPanel(panel.hidden));document.getElementById('close').addEventListener('click',()=>showPanel(false));
 window.addEventListener('resize',apply);apply();
