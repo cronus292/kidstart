@@ -19,22 +19,22 @@ body{height:100vh;height:100dvh}
 .toolbar{position:absolute;z-index:3;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));display:flex;align-items:flex-start;justify-content:space-between;gap:10px;pointer-events:none}
 .toolbar a,.toolbar button{pointer-events:auto;border:1px solid #b6c4d7;border-radius:10px;background:rgba(255,255,255,.94);color:#173a73;text-decoration:none;font-size:15px;font-weight:650;padding:10px 12px;min-height:44px;box-shadow:0 1px 8px #0002}
 .panel{position:absolute;z-index:4;top:calc(max(8px,env(safe-area-inset-top)) + 54px);right:max(8px,env(safe-area-inset-right));width:min(340px,calc(100% - 16px));background:#fffefb;border:1px solid #bcc8d5;border-radius:13px;padding:14px;box-shadow:0 4px 24px #0003;font-size:14px}
-.panel[hidden]{display:none}.panel h2{font-size:16px;margin:0 0 6px}.panel p{margin:4px 0 12px;color:#46556a}.row{display:grid;grid-template-columns:1fr auto;gap:5px 8px;margin:12px 0}.row label{font-weight:600}.row input{grid-column:1/-1;width:100%;accent-color:#1858a7;min-height:30px}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button,.actions a{font:inherit;border:1px solid #bdc8d7;border-radius:8px;background:#f6f9ff;padding:9px 11px;color:#173a73;text-decoration:none}.tip{font-size:12px;color:#566376}
+.panel[hidden]{display:none}.panel h2{font-size:16px;margin:0 0 6px}.panel p{margin:4px 0 12px;color:#46556a}.row{display:grid;grid-template-columns:1fr auto;gap:5px 8px;margin:12px 0}.row label{font-weight:600}.row input[type=range]{width:100%;accent-color:#1858a7;min-height:34px}.row .entry{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:9px;align-items:center}.row input[type=number]{width:100%;font:inherit;font-size:16px;padding:7px 5px;border:1px solid #9baec5;border-radius:8px;min-height:40px;text-align:right}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button,.actions a{font:inherit;border:1px solid #bdc8d7;border-radius:8px;background:#f6f9ff;padding:9px 11px;color:#173a73;text-decoration:none}.tip{font-size:12px;color:#566376}
 #warning{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;background:white;padding:24px;text-align:center}#warning.visible{display:flex}
 </style>
 </head>
 <body>
 <div id="app">
 <div class="viewer" id="viewer"><iframe id="game" title="Digipuzzle" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-<div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="full" type="button" title="Volledig scherm met Kinderstart-knoppen">⛶ Schermvullend</button><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
+<div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="full" type="button" title="Volledig scherm aanvragen (op iPad is Kinderstart als webapp al schermvullend)">⛶ Schermvullend</button><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
 <section class="panel" id="panel" hidden aria-label="Weergave-instellingen">
 <h2>Spelweergave aanpassen</h2>
-<p>Zoom het iframe in of uit, verschuif het horizontaal of verticaal en snijd ongewenste randen af. Daarmee verandert ook de beschikbare ruimte waarin Digipuzzle zijn spel tekent. De instellingen worden op deze iPad onthouden.</p>
-<div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><input id="crop" type="range" min="0" max="450" step="5" value="0"></div>
-<div class="row"><label for="leftCrop">Linkerkant afsnijden</label><output id="leftCropValue">0 px</output><input id="leftCrop" type="range" min="0" max="450" step="5" value="0"></div>
-<div class="row"><label for="zoom">Iframe-zoom (uit- en inzoomen)</label><output id="zoomValue">100%</output><input id="zoom" type="range" min="10" max="190" step="5" value="100"></div>
-<div class="row"><label for="shift">Verticaal verschuiven (− omhoog, + omlaag)</label><output id="shiftValue">0 px</output><input id="shift" type="range" min="-120" max="200" step="5" value="0"></div>
-<div class="row"><label for="shiftX">Horizontaal verschuiven (− links, + rechts)</label><output id="shiftXValue">0 px</output><input id="shiftX" type="range" min="-300" max="300" step="5" value="0"></div>
+<p>Gebruik de schuifregelaars of vul precieze getallen in. De instellingen worden per spel op deze iPad onthouden.</p>
+<div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><div class="entry"><input id="crop" type="range" min="0" max="450" step="5" value="0"><input type="number" id="cropNumber" min="0" max="450" step="1" value="0" aria-label="Waarde crop"></div></div>
+<div class="row"><label for="leftCrop">Linkerkant afsnijden</label><output id="leftCropValue">0 px</output><div class="entry"><input id="leftCrop" type="range" min="0" max="450" step="5" value="0"><input type="number" id="leftCropNumber" min="0" max="450" step="1" value="0" aria-label="Waarde leftCrop"></div></div>
+<div class="row"><label for="zoom">Iframe-zoom (uit- en inzoomen)</label><output id="zoomValue">100%</output><div class="entry"><input id="zoom" type="range" min="10" max="190" step="5" value="100"><input type="number" id="zoomNumber" min="10" max="190" step="1" value="100" aria-label="Waarde zoom"></div></div>
+<div class="row"><label for="shift">Verticaal verschuiven (− omhoog, + omlaag)</label><output id="shiftValue">0 px</output><div class="entry"><input id="shift" type="range" min="-120" max="200" step="5" value="0"><input type="number" id="shiftNumber" min="-120" max="200" step="1" value="0" aria-label="Waarde shift"></div></div>
+<div class="row"><label for="shiftX">Horizontaal verschuiven (− links, + rechts)</label><output id="shiftXValue">0 px</output><div class="entry"><input id="shiftX" type="range" min="-300" max="300" step="5" value="0"><input type="number" id="shiftXNumber" min="-300" max="300" step="1" value="0" aria-label="Waarde shiftX"></div></div>
 <div class="actions"><button id="reset" type="button">Herstellen</button><button id="close" type="button">Gereed</button><a id="direct" href="#">Rechtstreeks ↗</a></div>
 <p class="tip">Let op: het iframe wordt visueel geschaald en afgesneden. Of het spel zelf groter wordt, hangt af van de Digipuzzle-layout. De advertentiecontainer wordt niet uit de website verwijderd.</p>
 </section>
@@ -90,11 +90,28 @@ document.getElementById('zoomValue').textContent=Math.round(z*100)+'%';
 document.getElementById('shiftValue').textContent=(s>0?'+':'')+s+' px';
 try{localStorage.setItem(key,JSON.stringify({crop:c,leftCrop:lc,zoom:Number(zoom.value),shift:s,shiftX:sx}))}catch(_){}
 }
-[crop,leftCrop,zoom,shift,shiftX].forEach(el=>el.addEventListener('input',apply));
-document.getElementById('reset').addEventListener('click',()=>{crop.value=0;leftCrop.value=0;zoom.value=100;shift.value=0;shiftX.value=0;apply()});
+// Synchroniseer schuifregelaar en handmatige invoer in beide richtingen.
+[crop,leftCrop,zoom,shift,shiftX].forEach(el=>{
+ const number=document.getElementById(el.id+'Number');
+ function updateFromSlider(){number.value=el.value;apply()}
+ function updateFromNumber(){
+  if(number.value.trim()==='')return;
+  const value=Number(number.value);
+  if(!Number.isFinite(value))return;
+  const clamped=Math.max(Number(el.min),Math.min(Number(el.max),Math.round(value)));
+  el.value=String(clamped);number.value=el.value;apply();
+ }
+ el.addEventListener('input',updateFromSlider);
+ number.addEventListener('change',updateFromNumber);
+ number.addEventListener('blur',()=>{number.value=el.value});
+ number.value=el.value;
+});
+document.getElementById('reset').addEventListener('click',()=>{crop.value=0;leftCrop.value=0;zoom.value=100;shift.value=0;shiftX.value=0;[crop,leftCrop,zoom,shift,shiftX].forEach(el=>document.getElementById(el.id+'Number').value=el.value);apply()});
 function showPanel(open){panel.hidden=!open;settings.setAttribute('aria-expanded',String(open));}
 settings.addEventListener('click',()=>showPanel(panel.hidden));document.getElementById('close').addEventListener('click',()=>showPanel(false));
 window.addEventListener('resize',apply);apply();
+// Op iPadOS kan de Fullscreen API niet automatisch zonder gebruikersactie starten.
+// De geïnstalleerde Kinderstart-webapp draait al zonder browserbalken.
 })();
 </script>
 </body>
