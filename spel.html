@@ -25,7 +25,7 @@ body{height:100vh;height:100dvh}
 </head>
 <body>
 <div id="app">
-<div class="viewer" id="viewer"><iframe id="game" title="Digipuzzle" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<div class="viewer" id="viewer"><iframe id="game" title="Educatieve website" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <div class="toolbar"><a id="back" href="kind1.html">← Terug</a><button id="full" type="button" title="Volledig scherm aanvragen (op iPad is Kinderstart als webapp al schermvullend)">⛶ Schermvullend</button><button id="settings" type="button" aria-expanded="false" aria-controls="panel">⚙ Weergave</button></div>
 <section class="panel" id="panel" hidden aria-label="Weergave-instellingen">
 <div class="panel-head"><div id="modeLabel" class="mode-label">Profiel: standaard</div><button id="rollback" class="reset-top" type="button">↶ Vorige</button></div>
@@ -47,7 +47,7 @@ const child=/^[1-4]$/.test(params.get('kind')||'')?params.get('kind'):'1';
 document.getElementById('back').href='kind'+child+'.html';
 document.getElementById('fallback').href='kind'+child+'.html';
 let url;
-try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net'].includes(url.hostname))throw Error('URL niet toegestaan');}
+try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net','app.automatus.be'].includes(url.hostname))throw Error('URL niet toegestaan');}
 catch(_){document.getElementById('warning').classList.add('visible');return;}
 if(url.hostname.endsWith('digipuzzle.net')&&!url.searchParams.has('nolink'))url.searchParams.set('nolink','true');
 document.getElementById('game').src=url.href;
