@@ -48,7 +48,7 @@ const child=/^[1-4]$/.test(params.get('kind')||'')?params.get('kind'):'1';
 document.getElementById('back').href='kind'+child+'.html';
 document.getElementById('fallback').href='kind'+child+'.html';
 let url;
-try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net','app.automatus.be','www.edugames.online','edugames.online'].includes(url.hostname))throw Error('URL niet toegestaan');}
+try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net','app.automatus.be','www.edugames.online','edugames.online','thisissand.com','www.thisissand.com','sommenmaker.nl','www.sommenmaker.nl'].includes(url.hostname))throw Error('URL niet toegestaan');}
 catch(_){document.getElementById('warning').classList.add('visible');return;}
 if(url.hostname.endsWith('digipuzzle.net')&&!url.searchParams.has('nolink'))url.searchParams.set('nolink','true');
 document.getElementById('game').src=url.href;
