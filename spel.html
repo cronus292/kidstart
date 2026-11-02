@@ -31,6 +31,7 @@ body{height:100vh;height:100dvh}
 <div class="panel-head"><div id="modeLabel" class="mode-label">Profiel: standaard</div><button id="rollback" class="reset-top" type="button">↶ Vorige</button></div>
 <div class="state" id="safeStatus" role="status">De laatst bevestigde instellingen zijn actief.</div>
 <div class="row"><label for="crop">Onderkant afsnijden</label><output id="cropValue">0 px</output><div class="entry"><input id="crop" type="range" min="0" max="450" step="5" value="0"><input type="number" id="cropNumber" min="0" max="450" step="1" value="0" aria-label="Waarde crop"></div></div>
+<div class="row"><label for="topCrop">Bovenkant afsnijden</label><output id="topCropValue">0 px</output><div class="entry"><input id="topCrop" type="range" min="0" max="500" step="5" value="0"><input type="number" id="topCropNumber" min="0" max="500" step="1" value="0" aria-label="Waarde bovenkant afsnijden"></div></div>
 <div class="row"><label for="leftCrop">Linkerkant afsnijden</label><output id="leftCropValue">0 px</output><div class="entry"><input id="leftCrop" type="range" min="0" max="450" step="5" value="0"><input type="number" id="leftCropNumber" min="0" max="450" step="1" value="0" aria-label="Waarde leftCrop"></div></div>
 <div class="row"><label for="zoom">Iframe-zoom (uit- en inzoomen)</label><output id="zoomValue">100%</output><div class="entry"><input id="zoom" type="range" min="10" max="190" step="5" value="100"><input type="number" id="zoomNumber" min="10" max="190" step="1" value="100" aria-label="Waarde zoom"></div></div>
 <div class="row"><label for="shift">Verticaal verschuiven (− omhoog, + omlaag)</label><output id="shiftValue">0 px</output><div class="entry"><input id="shift" type="range" min="-120" max="200" step="5" value="0"><input type="number" id="shiftNumber" min="-120" max="200" step="1" value="0" aria-label="Waarde shift"></div></div>
@@ -47,7 +48,7 @@ const child=/^[1-4]$/.test(params.get('kind')||'')?params.get('kind'):'1';
 document.getElementById('back').href='kind'+child+'.html';
 document.getElementById('fallback').href='kind'+child+'.html';
 let url;
-try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net','app.automatus.be'].includes(url.hostname))throw Error('URL niet toegestaan');}
+try{url=new URL(params.get('url')||'https://www.digipuzzle.net/minigames/build/build.htm?nolink=true');if(url.protocol!=='https:'||!['www.digipuzzle.net','digipuzzle.net','app.automatus.be','www.edugames.online','edugames.online'].includes(url.hostname))throw Error('URL niet toegestaan');}
 catch(_){document.getElementById('warning').classList.add('visible');return;}
 if(url.hostname.endsWith('digipuzzle.net')&&!url.searchParams.has('nolink'))url.searchParams.set('nolink','true');
 document.getElementById('game').src=url.href;
@@ -59,13 +60,13 @@ function currentFullscreen(){return document.fullscreenElement||document.webkitF
 // Ook op iPadOS zonder Fullscreen API kan tussen beide weergaveprofielen worden gewisseld.
 const storePrefix='kinderstart_profiles_v2_'+url.origin+url.pathname+url.search;
 const legacyKey='kinderstart_view_'+url.pathname;
-const defaults={crop:0,leftCrop:0,zoom:100,shift:0,shiftX:0};
-const limits={crop:[0,450],leftCrop:[0,450],zoom:[10,190],shift:[-120,200],shiftX:[-300,300]};
+const defaults={crop:0,topCrop:0,leftCrop:0,zoom:100,shift:0,shiftX:0};
+const limits={crop:[0,450],topCrop:[0,500],leftCrop:[0,450],zoom:[10,190],shift:[-120,200],shiftX:[-300,300]};
 function sanitize(obj){const result={};for(const k of Object.keys(defaults)){const n=Number(obj?.[k]);result[k]=Number.isFinite(n)?Math.round(Math.min(limits[k][1],Math.max(limits[k][0],n))):defaults[k]}return result}
 function storageRead(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(_){return null}}
 function storageWrite(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){message('Opslaan mislukt: opslag is niet beschikbaar.');return false}}
-const crop=document.getElementById('crop'),leftCrop=document.getElementById('leftCrop'),zoom=document.getElementById('zoom'),shift=document.getElementById('shift'),shiftX=document.getElementById('shiftX');
-const controls={crop,leftCrop,zoom,shift,shiftX};
+const crop=document.getElementById('crop'),topCrop=document.getElementById('topCrop'),leftCrop=document.getElementById('leftCrop'),zoom=document.getElementById('zoom'),shift=document.getElementById('shift'),shiftX=document.getElementById('shiftX');
+const controls={crop,topCrop,leftCrop,zoom,shift,shiftX};
 const modeLabel=document.getElementById('modeLabel'),safeStatus=document.getElementById('safeStatus');
 let mode='standard',requestedFullscreen=false;
 let data=storageRead(storePrefix);
@@ -106,17 +107,18 @@ function onFullChange(){if(!currentFullscreen()&&requestedFullscreen){requestedF
 document.addEventListener('fullscreenchange',onFullChange);
 document.addEventListener('webkitfullscreenchange',onFullChange);
 function apply(){
-const c=Number(crop.value),lc=Number(leftCrop.value),z=Number(zoom.value)/100,s=Number(shift.value),sx=Number(shiftX.value);
+const c=Number(crop.value),tc=Number(topCrop.value),lc=Number(leftCrop.value),z=Number(zoom.value)/100,s=Number(shift.value),sx=Number(shiftX.value);
 const w=viewer.clientWidth,h=viewer.clientHeight;
 // Een kleinere schaal geeft Digipuzzle een bredere/ hogere virtuele viewport.
 // Positieve verschuiving beweegt omlaag; negatieve verschuiving omhoog.
-// Extra hoogte (crop) houdt de iframe-inhoud ook bij bijsnijden bereikbaar.
+// Boven- en onderbijsnijden vergroten de virtuele iframe-hoogte; de bovenkant wordt buiten beeld geplaatst.
 // Het iframe begint links buiten beeld met de ingestelde afsnijding.
 // De breedte wordt aangepast zodat de rechterrand desondanks beschikbaar blijft.
 game.style.width=(Math.max(1,w-sx+lc)/z)+'px';
-game.style.height=((h-s+c)/z)+'px';
-game.style.transform=`translate(${sx-lc}px, ${s}px) scale(${z})`;
+game.style.height=(Math.max(1,h-s+tc+c)/z)+'px';
+game.style.transform=`translate(${sx-lc}px, ${s-tc}px) scale(${z})`;
 document.getElementById('cropValue').textContent=c+' px';
+document.getElementById('topCropValue').textContent=tc+' px';
 document.getElementById('leftCropValue').textContent=lc+' px';
 document.getElementById('shiftXValue').textContent=(sx>0?'+':'')+sx+' px';
 document.getElementById('zoomValue').textContent=Math.round(z*100)+'%';
@@ -124,7 +126,7 @@ document.getElementById('shiftValue').textContent=(s>0?'+':'')+s+' px';
 
 }
 // Synchroniseer schuifregelaar en handmatige invoer in beide richtingen.
-[crop,leftCrop,zoom,shift,shiftX].forEach(el=>{
+[crop,topCrop,leftCrop,zoom,shift,shiftX].forEach(el=>{
  const number=document.getElementById(el.id+'Number');
  function updateFromSlider(){number.value=el.value;values[el.id]=Number(el.value);apply();updateStatus()}
  function updateFromNumber(){
